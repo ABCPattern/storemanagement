@@ -1,0 +1,20 @@
+{
+  "name": "storemanagement",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "anushka",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^6.10.0",
+    "morgan": "^1.10.0",
+    "restify": "^11.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
