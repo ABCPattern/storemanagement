@@ -23,13 +23,11 @@ const productRoutes = require('./routes/products')
 const adminRoutes = require('./routes/admins')
 const superadminRoutes = require('./routes/superadmins')
 const categoryRoutes = require('./routes/categories')
-// const orderRoutes = require('./routes/orders')
 
 adminRoutes(server)
 categoryRoutes(server)
 productRoutes(server)
 superadminRoutes(server)
-//orderRoutes(server)
 
 server.listen(config.PORT, () => {
     console.info(`api is running on port ${config.PORT}`);

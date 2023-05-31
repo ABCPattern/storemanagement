@@ -1,0 +1,218 @@
+[{
+  "_id": {
+    "$oid": "64747aa85723ee40c48e3401"
+  },
+  "name": "Anushka",
+  "address": "Shaniwarwada",
+  "categoryId": {
+    "$oid": "647438655fe2df2eb2be39ad"
+  },
+  "__v": 0,
+  "password": "Anu@123",
+  "username": "Anu123"
+},
+{
+  "_id": {
+    "$oid": "64747ad15723ee40c48e3403"
+  },
+  "name": "Karan",
+  "address": "Shaniwarwada",
+  "categoryId": {
+    "$oid": "647438655fe2df2eb2be39ad"
+  },
+  "__v": 0,
+  "password": "Karan@123",
+  "username": "karan123"
+},
+{
+  "_id": {
+    "$oid": "64747adb5723ee40c48e3405"
+  },
+  "name": "Yadnesh",
+  "address": "Shaniwarwada",
+  "categoryId": {
+    "$oid": "647438655fe2df2eb2be39ad"
+  },
+  "__v": 0,
+  "password": "Yadnesh@123",
+  "username": "yad123"
+},
+{
+  "_id": {
+    "$oid": "64747af35723ee40c48e3407"
+  },
+  "name": "Yogesh",
+  "address": "Shaniwarwada",
+  "categoryId": {
+    "$oid": "6474395646af71ab6f14e3bc"
+  },
+  "__v": 0,
+  "password": "yogesh@123",
+  "username": "yog123"
+},
+{
+  "_id": {
+    "$oid": "64747b075723ee40c48e3409"
+  },
+  "name": "Rohit",
+  "address": "JP Road, Pune",
+  "categoryId": {
+    "$oid": "6474395646af71ab6f14e3bc"
+  },
+  "__v": 0,
+  "password": "rohit@123",
+  "username": "rohit123"
+},
+{
+  "_id": {
+    "$oid": "64747b0d5723ee40c48e340b"
+  },
+  "name": "Geet",
+  "address": "ABC",
+  "categoryId": {
+    "$oid": "6474395646af71ab6f14e3bc"
+  },
+  "__v": 0,
+  "password": "geet@123",
+  "username": "geet123"
+},
+{
+  "_id": {
+    "$oid": "64759ad2004e58b7e8d5a53e"
+  },
+  "name": "Anushka",
+  "address": "Pimpari Chinchwad",
+  "categoryId": "647438655fe2df2eb2be39ad",
+  "password": "Anushka@123",
+  "username": "Anushka123"
+},
+{
+  "_id": {
+    "$oid": "6475b60c842b1c68de31c560"
+  },
+  "name": "Abram",
+  "address": "UK",
+  "categoryId": {
+    "$oid": "64759e82004e58b7e8d5a54a"
+  },
+  "__v": 0,
+  "password": "Abram@123",
+  "username": "Abram123"
+},
+{
+  "_id": {
+    "$oid": "6475b64e842b1c68de31c564"
+  },
+  "name": "Brady",
+  "address": "UK",
+  "categoryId": {
+    "$oid": "64759e82004e58b7e8d5a54a"
+  },
+  "__v": 0,
+  "password": "Brady@123",
+  "username": "brad123"
+},
+{
+  "_id": {
+    "$oid": "6475b65d842b1c68de31c566"
+  },
+  "name": "Briana",
+  "address": "UK",
+  "categoryId": {
+    "$oid": "64759e82004e58b7e8d5a54a"
+  },
+  "__v": 0,
+  "password": "briana@123",
+  "username": "briana123"
+},
+{
+  "_id": {
+    "$oid": "6475b698842b1c68de31c568"
+  },
+  "name": "Carole",
+  "address": "US",
+  "categoryId": {
+    "$oid": "64759e0a004e58b7e8d5a546"
+  },
+  "__v": 0,
+  "password": "carole@123",
+  "username": "carole123"
+},
+{
+  "_id": {
+    "$oid": "6475b6c3842b1c68de31c56a"
+  },
+  "name": "Ciera",
+  "address": "New York",
+  "categoryId": {
+    "$oid": "64759e0a004e58b7e8d5a546"
+  },
+  "__v": 0,
+  "password": "ciera@123",
+  "username": "ciera123"
+},
+{
+  "_id": {
+    "$oid": "6475b6e2842b1c68de31c56c"
+  },
+  "name": "Calby",
+  "address": "New York",
+  "categoryId": {
+    "$oid": "64759e82004e58b7e8d5a54a"
+  },
+  "__v": 0,
+  "password": "calby@123",
+  "username": "calby123"
+},
+{
+  "_id": {
+    "$oid": "6475b6fc842b1c68de31c56e"
+  },
+  "name": "Daren",
+  "address": "New York",
+  "categoryId": {
+    "$oid": "64759e82004e58b7e8d5a54a"
+  },
+  "__v": 0,
+  "password": "daren@123",
+  "username": "daren123"
+},
+{
+  "_id": {
+    "$oid": "6475b774842b1c68de31c574"
+  },
+  "name": "Donald",
+  "address": "London",
+  "categoryId": {
+    "$oid": "647438655fe2df2eb2be39ad"
+  },
+  "__v": 0,
+  "password": "donald@123",
+  "username": "donald123"
+},
+{
+  "_id": {
+    "$oid": "6475b79f842b1c68de31c576"
+  },
+  "name": "Kris",
+  "address": "UK",
+  "categoryId": {
+    "$oid": "647438655fe2df2eb2be39ad"
+  },
+  "__v": 0,
+  "password": "kris@123",
+  "username": "kris123"
+},
+{
+  "_id": {
+    "$oid": "6476ead49a62207904d45d79"
+  },
+  "username": "Ram",
+  "password": "ram@123",
+  "name": "Govind",
+  "address": "UK",
+  "categoryId": {
+    "$oid": "647438655fe2df2eb2be39ad"
+  },
+  "__v": 0
+}]

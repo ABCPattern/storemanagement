@@ -1,0 +1,204 @@
+[{
+  "_id": {
+    "$oid": "6474500642853f9eac26ea51"
+  },
+  "name": "Vaseline Aloe Fresh Body Lotion",
+  "description": "200 ml",
+  "image": "images/prod-2",
+  "category": {
+    "$oid": "64759e82004e58b7e8d5a54a"
+  },
+  "price": "225",
+  "stock": 50,
+  "dateCreated": {
+    "$date": "2023-05-29T07:11:02.662Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64759fbe004e58b7e8d5a552"
+  },
+  "name": "Disposal Face Mask",
+  "description": "3ply protection, 12 in one pack",
+  "image": "images/prod-3",
+  "category": "64759ea2004e58b7e8d5a54c",
+  "price": "249",
+  "stock": 500
+},
+{
+  "_id": {
+    "$oid": "6475a00e004e58b7e8d5a554"
+  },
+  "name": "Visk Inhaler",
+  "description": "easy to carry",
+  "image": "images/prod-4",
+  "category": "64759ea2004e58b7e8d5a54c",
+  "price": "62",
+  "stock": 500
+},
+{
+  "_id": {
+    "$oid": "6475a048004e58b7e8d5a556"
+  },
+  "name": "Vicks Vaporub",
+  "description": "easy to carry",
+  "image": "images/prod-5",
+  "category": "64759ea2004e58b7e8d5a54c",
+  "price": "170",
+  "stock": 300
+},
+{
+  "_id": {
+    "$oid": "6475a13b004e58b7e8d5a55d"
+  },
+  "name": "Parle Hide and Seek",
+  "description": "Chocklate Crispy, 6 in one pack",
+  "image": "images/prod-6",
+  "category": "64759e5e004e58b7e8d5a548",
+  "price": "54",
+  "stock": 100
+},
+{
+  "_id": {
+    "$oid": "6475a194004e58b7e8d5a55f"
+  },
+  "name": "Britannia Good Day",
+  "description": "6 in one pack",
+  "image": "images/prod-7",
+  "category": "64759e5e004e58b7e8d5a548",
+  "price": "48",
+  "stock": 200
+},
+{
+  "_id": {
+    "$oid": "6475a1d9004e58b7e8d5a561"
+  },
+  "name": "Sunfeast Marrie Light",
+  "description": "12 in one pack",
+  "image": "images/prod-8",
+  "category": "64759e5e004e58b7e8d5a548",
+  "price": "135",
+  "stock": 200
+},
+{
+  "_id": {
+    "$oid": "6475a261004e58b7e8d5a565"
+  },
+  "name": "Amul Butter",
+  "description": "Pasteurised, 100g",
+  "image": "images/prod-9",
+  "category": "6474395646af71ab6f14e3bc",
+  "price": "56",
+  "stock": 100
+},
+{
+  "_id": {
+    "$oid": "6475a293004e58b7e8d5a567"
+  },
+  "name": "Amul Malai Paneer",
+  "description": "Combo 200g",
+  "image": "images/prod-10",
+  "category": "6474395646af71ab6f14e3bc",
+  "price": "182",
+  "stock": 50
+},
+{
+  "_id": {
+    "$oid": "6475a2ee004e58b7e8d5a569"
+  },
+  "name": "English Oven Multigrain Bread",
+  "description": "400g",
+  "image": "images/prod-11",
+  "category": "6474395646af71ab6f14e3bc",
+  "price": "60",
+  "stock": 400
+},
+{
+  "_id": {
+    "$oid": "6475b09b004e58b7e8d5a570"
+  },
+  "name": "Mango Alponso South",
+  "description": "6 piece",
+  "image": "images/prod-12",
+  "category": "647438655fe2df2eb2be39ad",
+  "price": "289",
+  "stock": 60
+},
+{
+  "_id": {
+    "$oid": "6475b0d6004e58b7e8d5a572"
+  },
+  "name": "lemon",
+  "description": "200g",
+  "image": "images/prod-13",
+  "category": "647438655fe2df2eb2be39ad",
+  "price": "25",
+  "stock": 80
+},
+{
+  "_id": {
+    "$oid": "6475b0f8004e58b7e8d5a574"
+  },
+  "name": "Cauliflower",
+  "description": "1 kg",
+  "image": "images/prod-14",
+  "category": "647438655fe2df2eb2be39ad",
+  "price": "28",
+  "stock": 40
+},
+{
+  "_id": {
+    "$oid": "6475b121004e58b7e8d5a576"
+  },
+  "name": "Marigold Flower Orange",
+  "description": "100g",
+  "image": "images/prod-15",
+  "category": "647438655fe2df2eb2be39ad",
+  "price": "25",
+  "stock": 60
+},
+{
+  "_id": {
+    "$oid": "6475b180004e58b7e8d5a57a"
+  },
+  "name": "Coca-Cola Soft Drink Combo",
+  "description": "3 pieces",
+  "image": "images/prod-16",
+  "category": "64759e0a004e58b7e8d5a546",
+  "price": "111",
+  "stock": 200
+},
+{
+  "_id": {
+    "$oid": "6475b1c6004e58b7e8d5a57c"
+  },
+  "name": "Mirinda Orange Flavoured Soft Drink",
+  "description": "750 ml",
+  "image": "images/prod-17",
+  "category": "64759e0a004e58b7e8d5a546",
+  "price": "111",
+  "stock": 200
+},
+{
+  "_id": {
+    "$oid": "6475b1e8004e58b7e8d5a57e"
+  },
+  "name": "Pepsi Soft Drink",
+  "description": "36",
+  "image": "images/prod-18",
+  "category": "64759e0a004e58b7e8d5a546",
+  "price": "36",
+  "stock": 200
+},
+{
+  "_id": {
+    "$oid": "6475b258004e58b7e8d5a582"
+  },
+  "name": "Dove Daily Shine Shampoo",
+  "description": "650 ml",
+  "image": "images/prod-19",
+  "category": "64759e82004e58b7e8d5a54a",
+  "price": "663",
+  "stock": 30
+}]

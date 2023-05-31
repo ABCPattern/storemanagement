@@ -151,7 +151,7 @@ module.exports = server =>{
       
             data.forEach((sadmin) => {
               for (let i = 0; i < sadmin.adminassign.length; i++) {
-                if (sadmin.adminassign[i] == adminassign) {
+                if (sadmin.adminassign[i].toString() == adminassign.toString()) {
                   k = 1;
                   //console.log(`Inside loop k  ${k}`);
                   res.json({
@@ -186,7 +186,7 @@ module.exports = server =>{
             data.forEach((sadmin) => {
               for (let i = 0; i < sadmin.adminassign.length; i++) {
                 for (let j = 0; j < adminassign.length; j++) {
-                  if (sadmin.adminassign[i] == adminassign[j]) {
+                  if (sadmin.adminassign[i].toString() == adminassign[j].toString()) {
                     k = 1;
                     res.status(500);
                     res.json({
@@ -236,7 +236,7 @@ module.exports = server =>{
       
           if (sadmin && bcrypt.compare(password, sadmin.password)) {
             for (let i = 0; i < sadmin.adminassign.length; i++) {
-              if (id == sadmin.adminassign[i]) {
+              if (id.toString() == sadmin.adminassign[i].toString()) {
                 k = 1;
                 if (!mongoose.isValidObjectId(id)) {
                   res.status(400);
@@ -294,7 +294,7 @@ module.exports = server =>{
       
           if (sadmin && bcrypt.compare(password, sadmin.password)) {
             for (let i = 0; i < sadmin.adminassign.length; i++) {
-              if (id == sadmin.adminassign[i]) {
+              if (id.toString() == sadmin.adminassign[i].toString()) {
                 k = 1;
                 if (!mongoose.isValidObjectId(id)) {
                   res.status(400);
