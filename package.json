@@ -10,10 +10,14 @@
   "author": "anushka",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "http": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.10.0",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
-    "restify": "^11.1.0"
+    "restify": "^11.1.0",
+    "restify-clients": "^4.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
