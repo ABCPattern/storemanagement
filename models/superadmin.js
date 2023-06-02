@@ -13,7 +13,7 @@ const superadminSchema = new Schema({
     adminassign:{
         type:[mongoose.Schema.Types.ObjectId],
         ref:'Admin',
-        required:true
+        default:[]
     }
 })
 

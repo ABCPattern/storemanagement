@@ -1,8 +1,12 @@
 const Admin = require('../models/admin')
 const Product = require('../models/product')
+const config = require('../config')
 const lodash = require('lodash')
+const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
+const controller = require('./Contollers')
+
 module.exports = server =>{
     //Display all Admin
     server.get('/admin', (req, res, next)=>{
@@ -20,9 +24,50 @@ module.exports = server =>{
             })
         })
     })
+    
+    
+
+    //login authorization
+    server.post('/loginadmin', async (req, res) =>{
+      const {username, password} = req.body
+      
+      const admin = await Admin.findOne({ username: username })
+      if (!admin) {
+        res.status(400);
+        res.send("The admin not found");
+        return;
+      }
+      if (admin && bcrypt.compare(password, admin.password)) {
+        const token = jwt.sign({username}, 'secretkey', {expiresIn:'1d'})
+        res.send(200, {token})
+      }
+      else{
+        res.send(401, {error:"Invalid username or password"})
+      }
+    })
+
+    //verification token
+    function verifyToken(req, res, next){
+      const bearerHeader = req.headers['authorization']
+      if(typeof bearerHeader !== 'undefined'){
+        const bearer = bearerHeader.split(" ")
+        const token = bearer[1]
+        jwt.verify(token, 'secretkey', (err, encoded)=>{
+          if(err){
+            return res.send("Invalid token")
+          }
+          else{
+            next()
+          } 
+        })
+      }
+      else{
+          return res.send(401, {error:"Invalid token"})
+      }
+    }
 
     //Diaplay the Admin by id
-    server.get('/admininfo/:id', (req, res, next) => {
+    server.get('/admininfo/:id', verifyToken, (req, res, next) => {
         const id = req.params.id
         if(!mongoose.isValidObjectId(id)){
             res.status(400)
@@ -43,8 +88,10 @@ module.exports = server =>{
             })
         })
     })
-
-    server.put('/admin/updateproduct', async (req, res) => {
+    
+    // update the product
+    //id of product is required in query
+    server.put('/admin/updateproduct', verifyToken, async (req, res) => {
         try {
           const username = req.body.username;
           const password = req.body.password;
@@ -94,6 +141,7 @@ module.exports = server =>{
         //   console.log(typeof admin.categoryId)
         //   console.log(typeof product.category)
           if (admin && bcrypt.compare(password, admin.password)) {
+            // jwt.sign({req.body}, "secretkey", )
                 if(lodash.isEqual(admin.categoryId, product.category)){
                     const updatedoc = await Product.findByIdAndUpdate(id, {$set:{description:description, image:image, category:category, price:price, stock:stock}})
                     if(updatedoc){
@@ -127,7 +175,10 @@ module.exports = server =>{
       }
       )
 
-      server.del('/admin/deleteproduct', async (req, res) => {
+
+      //delete product
+      //id of product required in query
+      server.del('/admin/deleteproduct', verifyToken, async (req, res) => {
         try {
           const username = req.body.username;
           const password = req.body.password;
