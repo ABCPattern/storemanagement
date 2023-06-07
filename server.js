@@ -7,22 +7,22 @@ const mongoose = require('mongoose');
 const server = restify.createServer();
 mongoose.set('strictQuery', true)
 mongoose.connect("mongodb://127.0.0.1:27017/Store", (err) => {
-    if(err){
+    if (err) {
         console.log(err)
-    }else{
+    } else {
         console.log("Connected successfully")
     }
 })
 
 //Middleware
-server.use(restify.plugins.bodyParser({mapParams: true}));
+server.use(restify.plugins.bodyParser({ mapParams: true }));
 server.use(restify.plugins.queryParser());
 
 //Routes
-const productRoutes = require('./routes/products')
-const adminRoutes = require('./routes/admins')
-const superadminRoutes = require('./routes/superadmins')
-const categoryRoutes = require('./routes/categories')
+const productRoutes = require('./routes/product')
+const adminRoutes = require('./routes/admin')
+const superadminRoutes = require('./routes/superadmin')
+const categoryRoutes = require('./routes/category')
 
 adminRoutes(server)
 categoryRoutes(server)

@@ -2,34 +2,34 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
 const productSchema = new Schema({
-    name:{
+    name: {
         type: String,
-        required:true
+        required: true
     },
-    description:{
+    description: {
         type: String,
-        required:true
+        required: true
     },
-    image:{
+    image: {
         type: String,
-        required:true
+        required: true
     },
-    category:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Category',
-        required:true
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true
     },
-    price:{
+    price: {
         type: String,
-        required:true
+        required: true
     },
-    stock:{
+    stock: {
         type: Number,
-        required:true
+        required: true
     },
-    dateCreated:{
-        type:Date,
-        default:Date.now
+    dateCreated: {
+        type: Date,
+        default: Date.now
     }
 })
 
