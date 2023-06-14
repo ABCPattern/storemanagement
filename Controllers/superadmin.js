@@ -8,7 +8,7 @@ const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
 
 exports.getSuperadmin = async (req, res) => {
-    const page = req.query.page || 0
+    const page = req.query.page || 2
     const pagesize = req.query.pagesize || 1
     const data = await SuperAdmin.find({}, '-password').populate('adminassign').skip(page).limit(pagesize)
     if (!data) {
@@ -49,7 +49,7 @@ exports.insert = (req, res, next) => {
                     res.status(400)
                     res.json({
                         success: false,
-                        message: "Bad request"
+                        message: `Bad request ${err}`
                     })
                     return
                 }
@@ -59,7 +59,7 @@ exports.insert = (req, res, next) => {
                         res.status(400)
                         res.json({
                             success: false,
-                            message: "Bad request"
+                            message: `Bad request ${err}`
                         })
                         return
                     }
@@ -164,8 +164,16 @@ exports.addadmin = async (req, res) => {
             address: req.body.address
         })
 
-        const sadmin = await SuperAdmin.findOne({ _id: req.query.id });
-
+        const sadmin = await SuperAdmin.findOne({ _id: req.query.id })
+        const existadmin = await Admin.findOne({ username: req.body.uname })
+        if (existadmin) {
+            res.status(404)
+            res.json({
+                success: false,
+                message: "Username already exist"
+            })
+            return
+        }
         if (!sadmin) {
             res.status(404);
             res.json({
@@ -221,11 +229,11 @@ exports.updatesuperadmin = async (req, res) => {
 
     try {
         const superadmin = await SuperAdmin.findOne({ _id: id })
-        if (!mongoose.isValidObjectId(id)) {
-            res.status(404);
+        if (!superadmin) {
+            res.status(403);
             res.json({
                 success: false,
-                message: "Invalid superadmin id"
+                message: "Superadmin not found"
             })
             return;
         }
@@ -376,7 +384,15 @@ exports.deleteadmin = async (req, res) => {
     try {
         const id = req.query.id;
         const aid = req.query.aid
-        const admin = await Admin.findById(id).exec()
+        if (!mongoose.isValidObjectId(id)) {
+            res.status(404);
+            res.json({
+                success: false,
+                message: "Invalid Admin id"
+            })
+            return
+        }
+        const admin = await Admin.findById(id)
         if (!admin) {
             res.status(404)
             res.json({
@@ -406,7 +422,7 @@ exports.deleteadmin = async (req, res) => {
                     return
                 }
                 await Admin.findByIdAndDelete(id);
-                await SuperAdmin.updateOne({ _id: aid }, { $pull: { adminassign: id } })
+                await SuperAdmin.findByIdAndUpdate(aid, { $pull: { adminassign: id } })
                 res.status(200);
                 res.json({ message: "Admin deleted successfully" });
                 return;

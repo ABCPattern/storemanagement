@@ -12,4 +12,6 @@ module.exports = server => {
     server.del('/deleteproduct/:id', [controller.deleteProduct])
 
     server.get('/productcount', [controller.productCount])
+
+    server.get('/product/category/:id', [controller.getProductByCategory])
 }

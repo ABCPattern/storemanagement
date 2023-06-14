@@ -59,8 +59,8 @@ exports.login = async (req, res) => {
             return
         }
         req.body.refreshKey = salt
-        const token = jwt.sign(req.body, config.secret)
-        if (!salt) {
+        const token = jwt.sign(req.body, config.secret, {expiresIn: '10m'})
+        if (!token) {
             res.status(400)
             res.json({
                 message: "Token is not generated"

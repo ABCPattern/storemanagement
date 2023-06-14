@@ -77,7 +77,16 @@ exports.productInfo = (req, res, next) => {
 }
 
 exports.addProduct = (req, res, next) => {
+    if (!mongoose.isValidObjectId(req.body.category)) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid category id"
+        })
+        return
+    }
     const category = Category.findById(req.body.category)
+
     if (!category) {
         res.status(404)
         res.json({
@@ -196,5 +205,43 @@ exports.productCount = async (req, res) => {
         res.status(200)
         res.json({ productcount: productcount })
     }
+}
+
+exports.getProductByCategory = async (req, res) => {
+    const id = req.params.id
+    if (!mongoose.isValidObjectId(id)) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid category id"
+        })
+        return
+    }
+    const categoryid = await Category.findById(id)
+    if (!categoryid) {
+        res.status(404)
+        console.log("fhsavjs")
+        res.json({
+            success: false,
+            message: "Category not found"
+        })
+        return
+    }
+    const data = await Product.find({ category: id })
+
+    if (!data) {
+        res.status(500)
+        console.log("ajsdkj")
+        res.json({
+            success: false,
+            message: "Error occured while retrieving data"
+        })
+        return
+    }
+    res.status(200)
+    res.json({
+        "data": data
+    })
+    return
 }
 

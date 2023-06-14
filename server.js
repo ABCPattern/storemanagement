@@ -1,10 +1,12 @@
 const restify = require('restify');
 const config = require('./config');
 const morgan = require('morgan');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 
-const server = restify.createServer();
+const server = restify.createServer()
+
+//strict query setting
 mongoose.set('strictQuery', true)
 mongoose.connect("mongodb://127.0.0.1:27017/Store", (err) => {
     if (err) {

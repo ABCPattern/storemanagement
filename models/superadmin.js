@@ -1,5 +1,5 @@
 const mongoose = require("mongoose")
-var mongoosePaginate = require('mongoose-paginate')
+// var mongoosePaginate = require('mongoose-paginate')
 const Schema = mongoose.Schema
 
 const superadminSchema = new Schema({
