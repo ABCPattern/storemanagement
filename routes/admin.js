@@ -1,46 +1,27 @@
 const controller = require('../Controllers/admin')
+const auth = require('../authentication')
 const config = require('../config')
 const jwt = require('jsonwebtoken')
-
-function verifyToken(req, res, next) {
-  const bearerHeader = req.headers['authorization']
-  if (typeof bearerHeader !== 'undefined') {
-    const bearer = bearerHeader.split(" ")
-    const token = bearer[1]
-    jwt.verify(token, config.secret, (err, encoded) => {
-      if (err) {
-        return res.send("Invalid token")
-      }
-      else {
-        next()
-      }
-    })
-  }
-  else {
-    return res.send(401, { error: "Invalid token" })
-  }
-}
 
 module.exports = server => {
 
   server.get('/admin', [controller.getAdmin])
 
-  server.post('/loginadmin', [controller.loginAdmin])
-
   server.get('/admininfo/:id', [
-    verifyToken,
+    auth.validJWTNeeded,
     controller.adminInfo
   ])
 
-  server.put('/admin/updateproduct', [
-    verifyToken,
-    controller.updateProduct
+  server.put('/superadmin/:sid/admin/:id', [
+    auth.validJWTNeeded,
+    controller.updateadmin
   ])
 
-  server.del('/admin/deleteproduct', [
-    verifyToken,
-    controller.deleteProduct
+  server.del('/superadmin/:sid/admin/:id', [
+    auth.validJWTNeeded,
+    controller.deleteadmin
   ])
 
 
+  
 }

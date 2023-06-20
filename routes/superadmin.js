@@ -4,41 +4,20 @@ const auth = require('../authentication')
 module.exports = server => {
   server.get('/superadmin', [controller.getSuperadmin])
 
-  server.post('/registration', [controller.insert])
-
-  server.put('/updatepassword', [
-    auth.validJWTNeeded,
-    controller.updatepassword
-  ])
-
-  server.post('/auth', [
-    auth.isPasswordMatch,
-    auth.login
-  ])
-
-  server.get('/superadmininfo', [
-    auth.validJWTNeeded,
-    controller.superadmininfo
-  ])
-
-  server.put('/superadmin/addadmin', [
+  server.put('/superadmin/:id/admin', [
     auth.validJWTNeeded,
     controller.addadmin
   ])
 
-  server.put('/updatesuperadmin/:id', [
+  server.get('/superadmin/:id', [
+    auth.validJWTNeeded,
+    controller.superadmininfo
+  ])
+
+  server.put('/superadmin/:id', [
     auth.validJWTNeeded,
     controller.updatesuperadmin
   ])
 
-  server.put('/superadmin/updateadmin/:aid', [
-    auth.validJWTNeeded,
-    controller.updateadmin
-  ])
-
-  server.del('/superadmin/deleteadmin', [
-    auth.validJWTNeeded,
-    controller.deleteadmin
-  ])
-
+  
 }

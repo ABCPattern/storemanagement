@@ -1,6 +1,6 @@
-const Admin = require('../models/admin')
-const SuperAdmin = require('../models/superadmin')
+const { User, Admin, SuperAdmin } = require('../models/user')
 const Product = require('../models/product')
+const Category = require('../models/category')
 const config = require('../config')
 const lodash = require('lodash')
 const jwt = require('jsonwebtoken')
@@ -11,6 +11,14 @@ exports.getSuperadmin = async (req, res) => {
     const page = req.query.page || 2
     const pagesize = req.query.pagesize || 1
     const data = await SuperAdmin.find({}, '-password').populate('adminassign').skip(page).limit(pagesize)
+    if(data == ""){
+        res.status(400)
+        res.json({
+            success:false,
+            message:"No superadmin exists"
+        })
+        return
+    }
     if (!data) {
         res.status(400)
         res.json({
@@ -28,131 +36,6 @@ exports.getSuperadmin = async (req, res) => {
     }
 }
 
-exports.insert = (req, res, next) => {
-    const username = req.body.username
-    const password = req.body.password
-    const saltrounds = 10
-
-    SuperAdmin.findOne({ username: username })
-        .then(response => {
-            if (response) {
-                res.status(400)
-                res.json({
-                    success: false,
-                    message: `${username} already exists`
-                })
-                return
-            }
-
-            bcrypt.genSalt(saltrounds, (err, salt) => {
-                if (err) {
-                    res.status(400)
-                    res.json({
-                        success: false,
-                        message: `Bad request ${err}`
-                    })
-                    return
-                }
-
-                bcrypt.hash(password, salt, (err, hash) => {
-                    if (err) {
-                        res.status(400)
-                        res.json({
-                            success: false,
-                            message: `Bad request ${err}`
-                        })
-                        return
-                    }
-
-                    req.body.password = hash;
-                    const sadmin = new SuperAdmin(req.body);
-                    sadmin.save()
-                        .then(response => {
-                            console.log(response);
-                            res.status(201)
-                            res.json({
-                                message: `Registered Successfully id:${response._id}`
-                            })
-                        })
-                        .catch(error => {
-                            console.log(error);
-                            res.status(500)
-                            res.json({
-                                success: false,
-                                message: error.message
-                            })
-                        })
-                })
-            })
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500)
-            res.json({
-                success: false,
-                message: err
-            })
-            return
-        })
-}
-
-
-exports.updatepassword = (req, res, next) => {
-    try {
-        const saltrounds = 10
-
-        bcrypt.genSalt(saltrounds, (err, salt) => {
-            if (err) {
-                res.status(400)
-                res.json({
-                    success: false,
-                    message: "Bad request"
-                })
-                return
-            }
-            bcrypt.hash(req.body.password, salt, (err, hash) => {
-                if (err) {
-                    res.status(400)
-                    res.json({
-                        success: false,
-                        message: "Bad request"
-                    })
-                    return
-                }
-                else {
-                    req.body.password = hash
-                    console.log(req.query.id)
-                    SuperAdmin.updateOne({ _id: req.query.id }, { $set: req.body })
-                        .then(response => {
-                            res.status(200)
-                            res.send({
-                                message: `Password updated Successfully`
-                            })
-                            return
-                        })
-                        .catch(error => {
-                            res.status(500)
-                            res.json({
-                                success: false,
-                                message: error
-                            })
-                            return
-                        })
-                }
-            })
-        })
-    }
-
-    catch (error) {
-        res.status(500)
-        res.json({ errors: error })
-        return
-    }
-
-}
-
-
-
 exports.addadmin = async (req, res) => {
     try {
 
@@ -160,17 +43,26 @@ exports.addadmin = async (req, res) => {
             username: req.body.uname,
             password: req.body.pass,
             name: req.body.name,
+            role: req.body.role,
             categoryId: req.body.categoryId,
             address: req.body.address
         })
 
-        const sadmin = await SuperAdmin.findOne({ _id: req.query.id })
-        const existadmin = await Admin.findOne({ username: req.body.uname })
+        const sadmin = await User.findOne({ _id: req.params.id })
+        if (sadmin.role != "Superadmin") {
+            res.status(409)
+            res.json({
+                success: false,
+                message: "Only supeadmin allowed to add new admin"
+            })
+            return
+        }
+        const existadmin = await User.findOne({ username: req.body.uname })
         if (existadmin) {
             res.status(404)
             res.json({
                 success: false,
-                message: "Username already exist"
+                message: `${req.body.uname} already exist`
             })
             return
         }
@@ -193,26 +85,37 @@ exports.addadmin = async (req, res) => {
             return
         }
         else {
-            const recent = await Admin.findOne().sort({ _id: -1 })
-
-            await SuperAdmin.updateOne(
-                { _id: req.query.id },
+            const recent = await User.findOne().sort({ _id: -1 })
+            console.log(recent._id)
+            const updatesuperadmin = await SuperAdmin.updateOne(
+                { _id: (req.params.id) },
                 { $push: { adminassign: recent._id } }
             )
-            res.status(200);
-            res.json({
-                message: "Admin is added and Superadmin updated successfully",
-            })
-            return
+            if (updatesuperadmin) {
+                res.status(200);
+                res.json({
+                    message: "Admin is added and Superadmin updated successfully",
+                })
+                return
+            }
+            else {
+                res.status(500);
+                res.json({
+                    message: "Internal server error occured while adding new admin",
+                })
+                return
+            }
+
 
         }
     }
     catch (error) {
         res.status(500);
-        res.json({ success: false, message: `An error occurred while adding the data: ${error}` })
+        res.json({ success: false, message: `Internal server error occurred while adding new admin: ${error}` })
         return
     }
 }
+
 
 exports.updatesuperadmin = async (req, res) => {
     const id = req.params.id;
@@ -226,11 +129,19 @@ exports.updatesuperadmin = async (req, res) => {
         })
         return
     }
-
+    const user = await User.findById(id)
+    if (user.role != "Superadmin") {
+        res.status(409)
+        res.json({
+            success: false,
+            message: "Only superadmim is allowed"
+        })
+        return
+    }
     try {
         const superadmin = await SuperAdmin.findOne({ _id: id })
         if (!superadmin) {
-            res.status(403);
+            res.status(404);
             res.json({
                 success: false,
                 message: "Superadmin not found"
@@ -241,8 +152,15 @@ exports.updatesuperadmin = async (req, res) => {
         const adminassign = req.body.adminassign;
 
         if (typeof adminassign === "string") {
-            console.log("String");
-
+            const existadmin = await Admin.findOne({ _id: adminassign })
+            if (!existadmin) {
+                res.status(404)
+                res.json({
+                    success: false,
+                    message: "Admin not found"
+                })
+                return
+            }
             const data = await SuperAdmin.find({}).exec();
 
             data.forEach((sadmin) => {
@@ -252,7 +170,7 @@ exports.updatesuperadmin = async (req, res) => {
                         res.status(409)
                         res.json({
                             success: false,
-                            message: `Superadmin already assigned for ${adminassign}`
+                            message: `Superadmin already assigned for ${existadmin.username}`
                         })
                         return
                     }
@@ -274,6 +192,17 @@ exports.updatesuperadmin = async (req, res) => {
         }
 
         if (Array.isArray(adminassign)) {
+            for (let x = 0; x < adminassign.length; x++) {
+                const admin = await Admin.findOne({ _id: adminassign[x] })
+                if (!admin) {
+                    res.status(404)
+                    res.json({
+                        success: false,
+                        message: "Admin not found"
+                    })
+                    return
+                }
+            }
             const data = await SuperAdmin.find({}).exec();
 
             data.forEach((sadmin) => {
@@ -310,135 +239,26 @@ exports.updatesuperadmin = async (req, res) => {
         res.status(500);
         res.json({
             success: false,
-            message: `An error occurred while retrieving data ${error}`
+            message: `Internal server error occurred while updating superadmin ${error}`
         })
         return
     }
 }
 
-exports.superadmininfo = (req, res, next) => {
-    SuperAdmin.findById(req.query.id).select('adminassign').populate('adminassign')
-        .then(response => {
-            res.status(200)
-            res.json({
-                "data": response
-            })
-            return
-        })
-        .catch(error => {
-            res.status(500)
-            res.json({ success: false, message: `Error occured while retrieving the data ${error}` })
-            return
-        })
-}
-
-
-exports.updateadmin = async (req, res) => {
-    try {
-        const aid = req.params.aid
-        const id = req.query.id;
-        let k = 0;
-        const sadmin = await SuperAdmin.findOne({ _id: aid });
-        const adminid = await Admin.findOne({ _id: req.query.id });
-
-        if (!sadmin) {
-            res.status(404);
-            res.send("The superadmin not found");
-            return;
-        }
-        if (!adminid) {
-            res.status(404);
-            res.send("Invalid Admin id");
-            return;
-        }
-
-        for (let i = 0; i < sadmin.adminassign.length; i++) {
-            if (id.toString() == sadmin.adminassign[i].toString()) {
-                k = 1;
-                await Admin.findByIdAndUpdate(
-                    id,
-                    { $set: req.body }
-                )
-
-                res.status(200);
-                res.json({ message: "Admin updated successfully" });
-                return;
-            }
-        }
-        if (k !== 1) {
-            res.status(403)
-            res.json({
-                message: "Update for this user is not allowed"
-            })
-            return
-        }
+exports.superadmininfo = async (req, res) => {
+    const info = await SuperAdmin.findById(req.params.id).select('adminassign').populate('adminassign')
+    if (!info) {
+        res.status(500)
+        res.json({ success: false, message: `Internal server error  occured while retrieving the superadmin data ${error}` })
+        return
     }
-    catch (error) {
-        res.status(500);
-        res.send({ message: `An error occurred while updating the data: ${error}` })
+    else {
+        res.status(200)
+        res.json({
+            "data": info
+        })
         return
     }
 }
 
-exports.deleteadmin = async (req, res) => {
-    try {
-        const id = req.query.id;
-        const aid = req.query.aid
-        if (!mongoose.isValidObjectId(id)) {
-            res.status(404);
-            res.json({
-                success: false,
-                message: "Invalid Admin id"
-            })
-            return
-        }
-        const admin = await Admin.findById(id)
-        if (!admin) {
-            res.status(404)
-            res.json({
-                message: "Admin not found"
-            })
-            return
-        }
-        let k = 0;
-        const sadmin = await SuperAdmin.findOne({ _id: aid });
 
-        if (!sadmin) {
-            res.status(404);
-            res.json({
-                message: "Superadmin not found"
-            })
-            return
-        }
-
-        for (let i = 0; i < sadmin.adminassign.length; i++) {
-            if (id.toString() == sadmin.adminassign[i].toString()) {
-                k = 1;
-                if (!mongoose.isValidObjectId(id)) {
-                    res.status(404);
-                    res.json({
-                        message: "Invalid Admin id"
-                    })
-                    return
-                }
-                await Admin.findByIdAndDelete(id);
-                await SuperAdmin.findByIdAndUpdate(aid, { $pull: { adminassign: id } })
-                res.status(200);
-                res.json({ message: "Admin deleted successfully" });
-                return;
-            }
-        }
-        if (k !== 1) {
-            res.status(403)
-            res.json({
-                message: "Delete for this user is not allowed"
-            })
-            return
-        }
-    }
-    catch (error) {
-        res.status(500);
-        res.json({ message: `An error occurred while deleting the data: ${error}` })
-        return
-    }
-}

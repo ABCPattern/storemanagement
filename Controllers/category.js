@@ -1,4 +1,6 @@
 const Category = require('../models/category')
+const Product = require('../models/product')
+const { User, Admin, SuperAdmin } = require('../models/user')
 const mongoose = require('mongoose')
 const Pagination = require('../models/pagination')
 const math = require('mathjs')
@@ -33,7 +35,7 @@ exports.getCategory = async (req, res) => {
         res.status(500)
         res.json({
             success: false,
-            message: `An error occured while retrieving the data`
+            message: `Internal server error occured while retrieving category data`
         })
         return
     }
@@ -70,38 +72,92 @@ exports.categoryInfo = (req, res, next) => {
             res.status(500)
             res.json({
                 success: false,
-                message: `An error occured while retreiving data ${error}`
+                message: `Internal server error occured while retreiving category data ${error}`
             })
             return
         })
 }
 
-exports.addCategory = (req, res, next) => {
+exports.addCategory = async (req, res) => {
+    const sid = req.params.sid
+
+    if (!mongoose.isValidObjectId(sid)) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid superadmin id"
+        })
+        return
+    }
+    let user = await User.findById(sid)
+    if (!user) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid user"
+        })
+        return
+    }
+    if (user.role != "Superadmin") {
+        res.status(409)
+        res.json({
+            success: false,
+            message: "Only Superadmin can add new category"
+        })
+        return
+    }
+
+    const categories = await Category.find({}).exec()
+    if (req.body) {
+        if (req.body.color) {
+            for (let i = 0; i < categories.length; i++) {
+                if (categories[i].color == req.body.color) {
+                    res.status(409)
+                    res.json({
+                        success: false,
+                        message: `${req.body.color} already exists`
+                    })
+                    return
+                }
+            }
+        }
+    }
+    else {
+        res.status(200)
+        res.json({
+            success: true,
+            message: "Please provide new data to add"
+        })
+        return
+    }
+
     let cate = new Category({
         id: req.body.id,
         name: req.body.name,
         color: req.body.color,
     })
-    cate.save()
-        .then(response => {
-            res.status(201)
-            res.json({
-                message: `New Category added successfully!\n${response}`
-            })
-            return
+    const newcategory = await cate.save()
+    if (!newcategory) {
+        res.status(500)
+        res.json({
+            success: false,
+            message: `Internal server error occured while adding new category`
         })
-        .catch(error => {
-            res.status(500)
-            res.json({
-                success: false,
-                message: `An error occured while inserting new category ${error}`
-            })
-            return
+        return
+    }
+    else {
+        res.status(201)
+        res.json({
+            success: true,
+            message: `New Category added successfully!`
         })
+        return
+    }
 }
 
-exports.updateCategory = (req, res, next) => {
+exports.updateCategory = async (req, res) => {
     const id = req.params.id
+    const sid = req.params.sid
     if (!mongoose.isValidObjectId(id)) {
         res.status(404)
         res.json({
@@ -110,66 +166,141 @@ exports.updateCategory = (req, res, next) => {
         })
         return
     }
+    if (!mongoose.isValidObjectId(sid)) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid superadmin id"
+        })
+        return
+    }
+    let user = await User.findById(sid)
+    if (!user) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid user"
+        })
+        return
+    }
+    if (user.role != "Superadmin") {
+        res.status(409)
+        res.json({
+            success: false,
+            message: "Only Superadmin can access the data"
+        })
+        return
+    }
+    const categories = await Category.find({}).exec()
     if (req.body) {
-        Category.findByIdAndUpdate(id,
+        if (req.body.color) {
+            for (let i = 0; i < categories.length; i++) {
+                if (categories[i].color == req.body.color) {
+                    res.status(409)
+                    res.json({
+                        success: false,
+                        message: `${req.body.color} already exists`
+                    })
+                    return
+                }
+            }
+        }
+        const updatecategory = await Category.findByIdAndUpdate(id,
             {
                 $set: req.body
             })
-            .then(() => {
-                res.status(200)
-                res.json({
-                    message: "Category updated successfully"
-                })
-                return
+        if (!updatecategory) {
+            res.status(500)
+            res.json({
+                success: false,
+                message: `Internal server error occured while updating the category`
             })
-            .catch(error => {
-                res.status(500)
-                res.json({
-                    success: false,
-                    message: `An error occured while updating the data ${error}`
-                })
-                return
+            return
+
+        }
+        else {
+            res.status(200)
+            res.json({
+                success: true,
+                message: "Category updated successfully"
             })
+            return
+        }
     }
     else {
         res.status(200)
         res.json({
             success: true,
-            message: "No changes"
+            message: "Please provide new data to update"
         })
         return
     }
 
 }
 
-exports.deleteCategory = (req, res, next) => {
+exports.deleteCategory = async (req, res) => {
     const id = req.params.id
-
-    const info = Category.findByIdAndRemove(id)
-        .then((category) => {
-            if (category) {
-                res.status(200)
-                res.json({
-                    message: `Category deleted successfully\n ${category}`
-                })
-                return
-            }
-            else {
-                res.status(404)
-                res.json({
-                    success: false,
-                    message: `category not found`
-                })
-                return
-            }
+    const sid = req.params.sid
+    if (!mongoose.isValidObjectId(id)) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid category id"
         })
-        .catch(error => {
-            res.status(500)
+        return
+    }
+    if (!mongoose.isValidObjectId(sid)) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid superadmin id"
+        })
+        return
+    }
+    let user = await User.findById(sid)
+    if (!user) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid user"
+        })
+        return
+    }
+    if (user.role != "Superadmin") {
+        res.status(409)
+        res.json({
+            success: false,
+            message: "Only Superadmin can access the data"
+        })
+        return
+    }
+    const category = await Category.findOne({ _id: id })
+    const data = await Product.find({ category: id }).populate('category').exec()
+    if (data == "") {
+        const deletecategory = await Category.findByIdAndRemove(id)
+        if (!deletecategory) {
+            res.status(404)
             res.json({
                 success: false,
-                message: `An error occured while deleting the category ${error}`
+                message: `Category not found`
             })
             return
+        }
+        else {
+            res.status(200)
+            res.json({
+                message: `Category deleted successfully!`
+            })
+            return
+        }
+    }
+    else {
+        res.status(403)
+        res.json({
+            success: false,
+            message: `Product are present for ${id}:${category.name}`
         })
+    }
+
 }
 

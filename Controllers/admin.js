@@ -1,4 +1,4 @@
-const Admin = require('../models/admin')
+const { User, Admin, SuperAdmin } = require('../models/user')
 const Product = require('../models/product')
 const config = require('../config')
 const lodash = require('lodash')
@@ -34,7 +34,7 @@ exports.getAdmin = async (req, res) => {
     })
     return
   }
-  const data = await Admin.find().limit(per_page).skip(skipitems)//output is promise hence use of then and catch method
+  const data = await Admin.find().populate('categoryId').limit(per_page).skip(skipitems)//output is promise hence use of then and catch method
   if (!data) {
     res.status(500)
     res.json({
@@ -48,36 +48,6 @@ exports.getAdmin = async (req, res) => {
     res.json({
       "data": data,
       "pagination": pages
-    })
-    return
-  }
-}
-
-exports.loginAdmin = async (req, res) => {
-  const { username, password } = req.body
-
-  const admin = await Admin.findOne({ username: username })
-  if (!admin) {
-    res.status(404);
-    res.json({
-      success: false,
-      message: "Admin not found"
-    })
-    return
-  }
-  if (admin && bcrypt.compare(password, admin.password)) {
-    const token = jwt.sign({ username }, config.secret, { expiresIn: '1d' })
-    res.status(200)
-    res.json({
-      "token": token
-    })
-    return
-  }
-  else {
-    res.status(401)
-    res.json({
-      success: false,
-      message: "Invalid username or password"
     })
     return
   }
@@ -111,137 +81,206 @@ exports.adminInfo = (req, res, next) => {
     })
 }
 
-exports.updateProduct = async (req, res) => {
+exports.updateadmin = async (req, res) => {
   try {
-    const username = req.body.username;
-    const password = req.body.password;
-    const id = req.query.id
-    let k = 0;
-    const admin = await Admin.findOne({ username: username })
-    const product = await Product.findOne({ _id: id })
-    //   console.log(product)
-    let description, image, category, price, stock
-    description = req.body.description || product.description
-    image = req.body.image || product.image
-    category = req.body.category || product.category
-    price = req.body.price || product.price
-    stock = req.body.stock || product.stock
+      const sid = req.params.sid
+      const id = req.params.id;
+      let k = 0;
+      const sadmin = await SuperAdmin.findOne({ _id: sid });
+      const adminid = await Admin.findOne({ _id: id });
 
-    console.log(description, image, category, price, stock)
-    if (!admin) {
-      res.status(404);
-      res.json({
-        success: false,
-        message: "Admin not found"
-      })
-      return
-    }
-    if (!product) {
-      res.status(404);
-      res.json({
-        success: false,
-        message: "Product not found"
-      })
-      return
-    }
+      if (!sadmin) {
+          res.status(404);
+          res.send("The superadmin not found");
+          return;
+      }
+      if (!adminid) {
+          res.status(404);
+          res.send("Invalid Admin id");
+          return;
+      }
+      if (req.body) {
+          const updated_data = {
+              "name": req.body.name,
+              "address": req.body.address
+          }
+          for (let i = 0; i < sadmin.adminassign.length; i++) {
+              console.log(sadmin.adminassign[i])
+              if (id.toString() == sadmin.adminassign[i].toString()) {
+                  console.log("dsvfj")
+                  k = 1;
+                  await Admin.findByIdAndUpdate(
+                      id,
+                      { $set: updated_data }
+                  )
+                  if (req.body.categoryId) {
+                      const newcategoryId = req.body.categoryId
 
-    if (admin && bcrypt.compare(password, admin.password)) {
+                      if (typeof newcategoryId === "string") {
+                          for (let k = 0; k < adminid.categoryId.length; k++) {
+                              if (newcategoryId.toString() == adminid.categoryId[k].toString()) {
+                                  let category = await Category.findOne({ _id: newcategoryId })
+                                  res.status(409)
+                                  res.json({
+                                      success: false,
+                                      message: `Already assigned to category ${newcategoryId}:${category.name}`
+                                  })
+                                  return
+                              }
+                          }
+                          const category = await Category.findOne({ _id: newcategoryId })
+                          if (!category) {
+                              res.status(404)
+                              res.json({
+                                  success: false,
+                                  message: "Category not found"
+                              })
+                              return
+                          }
+                          console.log(newcategoryId)
+                          await Admin.updateOne(
+                              { _id: id },
+                              { $push: { categoryId: newcategoryId } }
+                          )
 
-      if (lodash.isEqual(admin.categoryId, product.category)) {
-        const updatedoc = await Product.findByIdAndUpdate(id, { $set: { description: description, image: image, category: category, price: price, stock: stock } })
-        if (updatedoc) {
-          res.status(200)
-          res.json({
-            message: "Product updated successfully"
-          })
-        }
-        else if (!updatedoc) {
-          res.status(500)
-          res.json({
-            success: false,
-            message: `Error occured while updating the data`
-          })
-          return
-        }
+                          res.status(200);
+                          res.json({
+                              message: "Admin updated successfully"
+                          })
+                          return
+
+                      }
+
+                      if (Array.isArray(newcategoryId)) {
+
+                          for (let x = 0; x < newcategoryId.length; x++) {
+                              let category = await Category.findOne({ _id: newcategoryId[x] })
+                              if (!category) {
+                                  res.status(404)
+                                  res.json({
+                                      success: false,
+                                      message: "Category not found"
+                                  })
+                                  return
+                              }
+                          }
+                          for (let k = 0; k < adminid.categoryId.length; k++) {
+                              for (let j = 0; j < newcategoryId.length; j++) {
+                                  if (adminid.categoryId[k].toString() == newcategoryId[j].toString()) {
+                                      let category = await Category.findOne({ _id: newcategoryId[j] })
+                                      res.status(409)
+                                      res.json({
+                                          success: false,
+                                          message: `Already assigned to category ${newcategoryId[j]}:${category.name}`
+                                      })
+                                      return
+                                  }
+                              }
+
+                          }
+
+                          await Admin.updateOne(
+                              { _id: id },
+                              { $push: { categoryId: { $each: newcategoryId } } }
+                          )
+
+                          res.status(200);
+                          res.json({
+                              message: "Admin updated successfully",
+                          })
+                          return
+
+                      }
+                  }
+
+                  res.status(200);
+                  res.json({ message: "Admin updated successfully" });
+                  return;
+              }
+
+          }
+          if (k !== 1) {
+              res.status(409)
+              res.json({
+                  message: "Update for this user is not allowed"
+              })
+              return
+          }
       }
       else {
-        res.status(403)
-        res.json({
-          success: false,
-          message: "Update is not allowed"
-        })
-        return
+          req.status(403)
+          req.json({
+              success: false,
+              message: "Please provide new data to update"
+          })
       }
-    } else {
-      res.status(401);
-      res.json({
-        success: false,
-        message: "Password is Wrong"
-      })
-      return;
-    }
-  } catch (error) {
-    res.status(500);
-    res.json({ success: false, message: `An error occurred while updating the data: ${error}` })
-    return
+  }
+  catch (error) {
+      res.status(500);
+      res.send({ message: `Internal server error occurred while updating the admin: ${error}` })
+      return
   }
 }
 
-exports.deleteProduct = async (req, res) => {
+exports.deleteadmin = async (req, res) => {
   try {
-    const username = req.body.username;
-    const password = req.body.password;
-    const id = req.query.id;
-    const product = await Product.findById(id).exec()
-    if (!product) {
-      res.status(404)
-      res.json({
-        success: false,
-        message: "Product not found"
-      })
-      return
-    }
-    let k = 0;
-    const admin = await Admin.findOne({ username: username });
-
-    if (!admin) {
-      res.status(404);
-      res.json({
-        success: false,
-        message: "Admin not found"
-      })
-      return;
-    }
-
-    if (admin && bcrypt.compare(password, admin.password)) {
-      if (lodash.isEqual(admin.categoryId, product.category)) {
-        k = 1;
-        await Product.findByIdAndDelete(id)
-        res.status(200);
-        res.json({ message: "Product deleted successfully" });
-        return;
-
+      const id = req.params.id;
+      const sid = req.params.sid
+      if (!mongoose.isValidObjectId(id)) {
+          res.status(404);
+          res.json({
+              success: false,
+              message: "Invalid Admin id"
+          })
+          return
       }
-    } else {
-      res.status(401);
-      res.json({
-        success: false,
-        message: "Password is Wrong"
-      });
-      return;
-    }
+      const admin = await Admin.findById(id)
+      if (!admin) {
+          res.status(404)
+          res.json({
+              message: "Admin not found"
+          })
+          return
+      }
+      let k = 0;
+      const sadmin = await SuperAdmin.findOne({ _id: sid });
 
-    if (k !== 1) {
-      res.status(403)
-      res.json({
-        success: false,
-        message: "Delete for this user is not allowed"
-      })
+      if (!sadmin) {
+          res.status(404);
+          res.json({
+              message: "Superadmin not found"
+          })
+          return
+      }
+
+      for (let i = 0; i < sadmin.adminassign.length; i++) {
+          if (id.toString() == sadmin.adminassign[i].toString()) {
+              k = 1;
+              if (!mongoose.isValidObjectId(id)) {
+                  res.status(404);
+                  res.json({
+                      message: "Invalid Admin id"
+                  })
+                  return
+              }
+              await Admin.findByIdAndDelete(id);
+              await SuperAdmin.findByIdAndUpdate(sid, { $pull: { adminassign: id } })
+              res.status(200);
+              res.json({ message: "Admin deleted successfully" });
+              return;
+          }
+      }
+      if (k !== 1) {
+          res.status(403)
+          res.json({
+              message: "Delete for this user is not allowed"
+          })
+          return
+      }
+  }
+  catch (error) {
+      res.status(500);
+      res.json({ message: `Internal server error occurred while deleting the admin: ${error}` })
       return
-    }
-  } catch (error) {
-    res.status(500);
-    res.json({ success: false, message: `An error occurred while deleting the data: ${error}` })
-    return
   }
 }

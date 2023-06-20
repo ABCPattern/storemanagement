@@ -2,6 +2,7 @@ const restify = require('restify');
 const config = require('./config');
 const morgan = require('morgan');
 const mongoose = require('mongoose')
+const cookieParser = require('restify-cookies')
 
 
 const server = restify.createServer()
@@ -25,11 +26,13 @@ const productRoutes = require('./routes/product')
 const adminRoutes = require('./routes/admin')
 const superadminRoutes = require('./routes/superadmin')
 const categoryRoutes = require('./routes/category')
+const userRoutes = require('./routes/user')
 
 adminRoutes(server)
 categoryRoutes(server)
 productRoutes(server)
 superadminRoutes(server)
+userRoutes(server)
 
 server.listen(config.PORT, () => {
     console.info(`api is running on port ${config.PORT}`);

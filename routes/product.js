@@ -1,17 +1,26 @@
 const controller = require('../Controllers/product')
+const auth = require('../authentication')
 
 module.exports = server => {
     server.get('/product', [controller.getProduct])
 
-    server.get('/productinfo/:id', [controller.productInfo])
+    server.get('/product/:id', [
+        auth.validJWTNeeded,
+        controller.productInfo])
 
-    server.post('/addproduct', [controller.addProduct])
+    server.post('/product/user/:sid', [controller.addProduct])
 
-    server.put('/updateproduct/:id', [controller.updateProduct])
+    server.put('/user/:uid/product/:pid', [
+        auth.validJWTNeeded,
+        controller.updateProduct
+      ])
+    
+      server.del('/user/:uid/product/:pid', [
+        auth.validJWTNeeded,
+        controller.deleteProduct
+      ])
 
-    server.del('/deleteproduct/:id', [controller.deleteProduct])
+    server.get('/product/count', [controller.productCount])
 
-    server.get('/productcount', [controller.productCount])
-
-    server.get('/product/category/:id', [controller.getProductByCategory])
+    server.get('/category/:id/product', [controller.getProductByCategory])
 }
