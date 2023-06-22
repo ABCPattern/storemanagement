@@ -6,7 +6,7 @@ module.exports = server => {
     auth.validJWTNeeded,
     controller.getSuperadmin])
 
-  server.put('/admin', [
+  server.post('/admin', [
     auth.validJWTNeeded,
     controller.addadmin
   ])
