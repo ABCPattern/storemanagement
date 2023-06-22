@@ -14,12 +14,12 @@ module.exports = server => {
     controller.adminInfo
   ])
 
-  server.put('/superadmin/admin/:id', [
+  server.put('/admin/:id', [
     auth.validJWTNeeded,
     controller.updateadmin
   ])
 
-  server.del('/superadmin/admin/:id', [
+  server.del('/admin/:id', [
     auth.validJWTNeeded,
     controller.deleteadmin
   ])
