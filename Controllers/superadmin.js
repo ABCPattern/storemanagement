@@ -8,14 +8,34 @@ const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
 
 exports.getSuperadmin = async (req, res) => {
+    const username = req.decodetoken.username
+    let user = await User.findOne({ username: username })
+    if (!user) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: `${username} does not exist`
+        })
+        return
+    }
+    if (user.role != "Superadmin") {
+        res.status(409)
+        res.json({
+            success: false,
+            message: "Only superadmin can access"
+        })
+        return
+    }
+    const id = user._id
+
     const page = req.query.page || 2
     const pagesize = req.query.pagesize || 1
     const data = await SuperAdmin.find({}, '-password').populate('adminassign').skip(page).limit(pagesize)
-    if(data == ""){
+    if (data == "") {
         res.status(400)
         res.json({
-            success:false,
-            message:"No superadmin exists"
+            success: false,
+            message: "No superadmin exists"
         })
         return
     }
@@ -38,6 +58,17 @@ exports.getSuperadmin = async (req, res) => {
 
 exports.addadmin = async (req, res) => {
     try {
+        const username = req.decodetoken.username
+        let user = await User.findOne({ username: username })
+        if (!user) {
+            res.status(404)
+            res.json({
+                success: false,
+                message: `${username} does not exist`
+            })
+            return
+        }
+        const id = user._id
 
         let admin = new Admin({
             username: req.body.uname,
@@ -47,9 +78,7 @@ exports.addadmin = async (req, res) => {
             categoryId: req.body.categoryId,
             address: req.body.address
         })
-
-        const sadmin = await User.findOne({ _id: req.params.id })
-        if (sadmin.role != "Superadmin") {
+        if (user.role != "Superadmin") {
             res.status(409)
             res.json({
                 success: false,
@@ -66,14 +95,6 @@ exports.addadmin = async (req, res) => {
             })
             return
         }
-        if (!sadmin) {
-            res.status(404);
-            res.json({
-                success: false,
-                message: "Superadmin not found"
-            })
-            return;
-        }
 
         const newadmin = await admin.save()
         if (!newadmin) {
@@ -88,13 +109,13 @@ exports.addadmin = async (req, res) => {
             const recent = await User.findOne().sort({ _id: -1 })
             console.log(recent._id)
             const updatesuperadmin = await SuperAdmin.updateOne(
-                { _id: (req.params.id) },
+                { _id: (id) },
                 { $push: { adminassign: recent._id } }
             )
             if (updatesuperadmin) {
                 res.status(200);
                 res.json({
-                    message: "Admin is added and Superadmin updated successfully",
+                    message: `New Admin ${recent.username} is assigned to Superadmin ${username}`,
                 })
                 return
             }
@@ -105,8 +126,6 @@ exports.addadmin = async (req, res) => {
                 })
                 return
             }
-
-
         }
     }
     catch (error) {
@@ -125,7 +144,7 @@ exports.updatesuperadmin = async (req, res) => {
         res.status(404);
         res.json({
             success: false,
-            message: "Invalid Admin id"
+            message: "Invalid superdmin id"
         })
         return
     }
@@ -134,7 +153,7 @@ exports.updatesuperadmin = async (req, res) => {
         res.status(409)
         res.json({
             success: false,
-            message: "Only superadmim is allowed"
+            message: "Only superadmin is allowed"
         })
         return
     }
@@ -144,7 +163,7 @@ exports.updatesuperadmin = async (req, res) => {
             res.status(404);
             res.json({
                 success: false,
-                message: "Superadmin not found"
+                message: `Superadmin does not exist`
             })
             return;
         }
@@ -157,7 +176,7 @@ exports.updatesuperadmin = async (req, res) => {
                 res.status(404)
                 res.json({
                     success: false,
-                    message: "Admin not found"
+                    message: `Admin ${adminassign} does not exist`
                 })
                 return
             }
@@ -198,7 +217,7 @@ exports.updatesuperadmin = async (req, res) => {
                     res.status(404)
                     res.json({
                         success: false,
-                        message: "Admin not found"
+                        message: `Admin ${adminassign[x]} does not exist`
                     })
                     return
                 }
@@ -246,6 +265,24 @@ exports.updatesuperadmin = async (req, res) => {
 }
 
 exports.superadmininfo = async (req, res) => {
+    const username = req.decodetoken.username
+    let user = await User.findOne({ username: username })
+    if (!user) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "User does not exist"
+        })
+        return
+    }
+    if (user.role != "Superadmin") {
+        res.status(409)
+        res.json({
+            success: false,
+            message: "Only superadmin can access"
+        })
+        return
+    }
     const info = await SuperAdmin.findById(req.params.id).select('adminassign').populate('adminassign')
     if (!info) {
         res.status(500)

@@ -63,9 +63,7 @@ exports.insert = async (req, res) => {
                     return
                 }
             }
-
         }
-
     }
     else if (role === "Admin") {
         const userinfo = await User.findOne({ username: username })
@@ -117,23 +115,21 @@ exports.insert = async (req, res) => {
                     return
                 }
             }
-
         }
-
     }
 }
 
 exports.updatepassword = (req, res, next) => {
     try {
         const saltrounds = 10
-        if(!req.body || !req.body.password){
+        if (!req.body || !req.body.password) {
             res.status(404)
             res.json({
-                success:false,
-                message:"Please provide new password"
+                success: false,
+                message: "Please provide new password"
             })
             return
-        }    
+        }
         if (req.body.password) {
             bcrypt.genSalt(saltrounds, (err, salt) => {
                 if (err) {
@@ -175,14 +171,11 @@ exports.updatepassword = (req, res, next) => {
                 })
             })
         }
-
     }
-
     catch (error) {
         res.status(500)
         res.json({ errors: error })
         return
     }
-
 }
 

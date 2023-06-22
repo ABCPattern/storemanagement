@@ -79,25 +79,17 @@ exports.categoryInfo = (req, res, next) => {
 }
 
 exports.addCategory = async (req, res) => {
-    const sid = req.params.sid
-
-    if (!mongoose.isValidObjectId(sid)) {
-        res.status(404)
-        res.json({
-            success: false,
-            message: "Invalid superadmin id"
-        })
-        return
-    }
-    let user = await User.findById(sid)
+    const username = req.decodetoken.username
+    let user = await User.findOne({ username: username })
     if (!user) {
         res.status(404)
         res.json({
             success: false,
-            message: "Invalid user"
+            message: "User does not exist"
         })
         return
     }
+    const sid = user._id
     if (user.role != "Superadmin") {
         res.status(409)
         res.json({
@@ -157,29 +149,21 @@ exports.addCategory = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
     const id = req.params.id
-    const sid = req.params.sid
-    if (!mongoose.isValidObjectId(id)) {
-        res.status(404)
-        res.json({
-            success: false,
-            message: "Invalid category id"
-        })
-        return
-    }
-    if (!mongoose.isValidObjectId(sid)) {
-        res.status(404)
-        res.json({
-            success: false,
-            message: "Invalid superadmin id"
-        })
-        return
-    }
-    let user = await User.findById(sid)
+    const username = req.decodetoken.username
+    let user = await User.findOne({ username: username })
     if (!user) {
         res.status(404)
         res.json({
             success: false,
             message: "Invalid user"
+        })
+        return
+    }
+    if (!mongoose.isValidObjectId(id)) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "Invalid category id"
         })
         return
     }
@@ -240,29 +224,21 @@ exports.updateCategory = async (req, res) => {
 
 exports.deleteCategory = async (req, res) => {
     const id = req.params.id
-    const sid = req.params.sid
+    const username = req.decodetoken.username
+    let user = await User.findOne({ username: username })
+    if (!user) {
+        res.status(404)
+        res.json({
+            success: false,
+            message: "User does not exist"
+        })
+        return
+    }
     if (!mongoose.isValidObjectId(id)) {
         res.status(404)
         res.json({
             success: false,
             message: "Invalid category id"
-        })
-        return
-    }
-    if (!mongoose.isValidObjectId(sid)) {
-        res.status(404)
-        res.json({
-            success: false,
-            message: "Invalid superadmin id"
-        })
-        return
-    }
-    let user = await User.findById(sid)
-    if (!user) {
-        res.status(404)
-        res.json({
-            success: false,
-            message: "Invalid user"
         })
         return
     }
@@ -282,7 +258,7 @@ exports.deleteCategory = async (req, res) => {
             res.status(404)
             res.json({
                 success: false,
-                message: `Category not found`
+                message: `Category does not exist`
             })
             return
         }

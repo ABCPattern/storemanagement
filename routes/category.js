@@ -9,17 +9,17 @@ module.exports = server => {
     server.get('/category/:id', [controller.categoryInfo])
 
     //Add new customer
-    server.post('/user/:sid/category', [
+    server.post('/category', [
         auth.validJWTNeeded,
         controller.addCategory])
 
     //update the customer
-    server.put('/user/:sid/category/:id', [
+    server.put('/category/:id', [
         auth.validJWTNeeded,
         controller.updateCategory])
 
     //delete the customer
-    server.del('/user/:sid/category/:id', [
+    server.del('/category/:id', [
         auth.validJWTNeeded,
         controller.deleteCategory])
 }

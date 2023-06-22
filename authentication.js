@@ -1,107 +1,77 @@
 const jwt = require('jsonwebtoken')
 const config = require('./config')
 const lodash = require('lodash')
-const {User, Admin, SuperAdmin} = require('./models/user')
+const { User, Admin, SuperAdmin } = require('./models/user')
 const bcrypt = require('bcryptjs')
 
-exports.isPasswordMatch = async (req, res) => {
+exports.isPasswordMatch = (req, res, next) => {
     const enteredpassword = req.body.password
     const username = req.body.username
-    let user = await User.findOne({ username: username })
-    if (!user) {
-        res.status(400)
-        res.json({
-            message: "User not found"
-        })
-        return
-    }
-    else{
-        const sadmin = await SuperAdmin.findOne({username:username})
-        if(sadmin){
-            bcrypt.compare(enteredpassword, sadmin.password, (err, result) => {
-                // console.log(sadmin.password)
-                if (err) {
-                    res.status(401)
-                    res.send("Incorrect password")
-                    return
-                }
-                if (result) {
-                    return
-                }
-                else {
-                    res.status(401)
-                    res.send('Incorrect password')
-                    return
-                }
-            })
-            return
-        }
-        else{
-            const admin = await Admin.findOne({username:username})
-            if(admin){
-                bcrypt.compare(enteredpassword, admin.password, (err, result) => {
-                    if (err) {
-                        res.status(401)
-                        res.send("Incorrect password")
-                        return
-                    }
-                    if (result) {
-                        return
-                    }
-                    else {
-                        res.status(401)
-                        res.send('Incorrect password')
-                        return
-                    }
+    User.findOne({ username: username })
+        .then(user => {
+            if (!user) {
+                res.status(400)
+                res.json({
+                    success: false,
+                    message: "User does not exist"
                 })
                 return
-            }    
-        }
-    }
+            }
+            bcrypt.compare(enteredpassword, user.password, (err, result) => {
+                if (err) {
+                    console.log(result)
+                    res.status(401)
+                    res.json({
+                        success: false,
+                        error: err
+                    })
+                    return
+
+                }
+                if (!result) {
+                    res.json({
+                        success: false,
+                        message: "Incorrect password"
+                    })
+                }
+                if (result) {
+                    next()
+                }
+            })
+        })
+        .catch(err => {
+            res.json(err)
+        })
+
 }
+
 
 
 exports.login = async (req, res) => {
     try {
-        const refreshId = req.query.id + config.secret
-        const saltrounds = 10
-        const salt = await bcrypt.genSalt(saltrounds)
-        if (!salt) {
-            res.status(400)
-            res.json({
-                message: "Bad request"
-            })
-            return
-        }
-        const hash = await bcrypt.hash(refreshId, salt)
-        if (!hash) {
-            res.status(400)
-            res.json({
-                message: "Bad request"
-            })
-            return
-        }
-        // req.body.refreshKey = salt
-        const token = jwt.sign(req.body, config.secret, {expiresIn: '1h'})
+        const token = jwt.sign(req.body, config.secret, { expiresIn: '1h' })
         if (!token) {
             res.status(500)
             res.json({
+                success: false,
                 message: "Token is not generated"
             })
             return
         }
-        // const refresh_token = hash;
-        const refresh_token = jwt.sign(req.body, config.secret_refresh, {expiresIn:'1y'})
-        if(!refresh_token){
+        const refresh_token = jwt.sign(req.body, config.secret_refresh, { expiresIn: '7d' })
+        if (!refresh_token) {
             res.json(500)
             res.json({
-                message:"Refresh token is not generated"
+                success: false,
+                message: "Refresh token is not generated"
             })
             return
         }
-        res.status(201)
-        res.json({ accessToken: token, refreshToken: refresh_token })
-        return
+        if (token && refresh_token) {
+            res.status(200)
+            res.json({ succcess: true, accessToken: token, refreshToken: refresh_token })
+            return
+        }
     } catch (error) {
         res.status(500)
         res.json({ errors: error })
@@ -110,11 +80,7 @@ exports.login = async (req, res) => {
 }
 
 
-exports.validJWTNeeded = async (req, res) => {
-    const refreshId = req.query.id + config.secret
-    const saltrounds = 10
-    const salt = await bcrypt.genSalt(saltrounds)
-    const hash = await bcrypt.hash(refreshId, salt)
+exports.validJWTNeeded = (req, res, next) => {
     if (req.headers['authorization']) {
         try {
             let authorization = req.headers['authorization'].split(' ');
@@ -123,38 +89,38 @@ exports.validJWTNeeded = async (req, res) => {
                 console.log(authorization[0])
                 return res.status(401).send();
             } else {
-                req.jwt = jwt.verify(authorization[1], config.secret);
-                return
+                req.decodetoken = jwt.verify(authorization[1], config.secret)
+                next()
             }
         } catch (err) {
-            if(!req.body || !req.body.refreshtoken){
+            if (!req.header('refreshtoken')) {
                 res.status(400)
                 res.json({
-                    success:false,
-                    message:"Your session has expired"
+                    success: false,
+                    message: "Your session has expired or token is not valid"
                 })
                 return
             }
-            else if(req.body.refreshtoken){
-                const decodedrefreshtoken = jwt.verify(req.body.refreshtoken, config.secret_refresh)
-                const id = req.query.id
-                // console.log(decodedrefreshtoken.aud)
-                const newaccesstoken = jwt.sign({id}, config.secret, {expiresIn:'1h'})
-                const newrefreshtoken = jwt.sign({id}, config.secret_refresh, {expiresIn:'1y'})
+            else if (req.header('refreshtoken')) {
+                const decodedrefreshtoken = jwt.verify(req.header('refreshtoken'), config.secret_refresh)
+                const details = {
+                    "username": decodedrefreshtoken.username,
+                    "password": decodedrefreshtoken.password
+                }
+                const newaccesstoken = jwt.sign(details, config.secret, { expiresIn: '1h' })
+                const newrefreshtoken = jwt.sign(details, config.secret_refresh, { expiresIn: '7d' })
                 res.json({
-                    message:`Session for this user expired`,
+                    message: `Your session has expired`,
                     accessToken: newaccesstoken,
-                    refreshToken:newrefreshtoken
+                    refreshToken: newrefreshtoken
                 })
                 return
             }
-            
             res.status(403)
             res.send("Invalid token")
             return
         }
     } else {
-        
         res.status(401)
         res.send("Invalid token")
         return

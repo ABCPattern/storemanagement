@@ -5,23 +5,23 @@ const jwt = require('jsonwebtoken')
 
 module.exports = server => {
 
-  server.get('/admin', [controller.getAdmin])
+  server.get('/admin', [
+    auth.validJWTNeeded,
+    controller.getAdmin])
 
-  server.get('/admininfo/:id', [
+  server.get('/admin/:id', [
     auth.validJWTNeeded,
     controller.adminInfo
   ])
 
-  server.put('/superadmin/:sid/admin/:id', [
+  server.put('/superadmin/admin/:id', [
     auth.validJWTNeeded,
     controller.updateadmin
   ])
 
-  server.del('/superadmin/:sid/admin/:id', [
+  server.del('/superadmin/admin/:id', [
     auth.validJWTNeeded,
     controller.deleteadmin
   ])
-
-
   
 }

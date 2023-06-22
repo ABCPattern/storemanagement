@@ -2,9 +2,11 @@ const controller = require('../Controllers/superadmin')
 const auth = require('../authentication')
 
 module.exports = server => {
-  server.get('/superadmin', [controller.getSuperadmin])
+  server.get('/superadmin', [
+    auth.validJWTNeeded,
+    controller.getSuperadmin])
 
-  server.put('/superadmin/:id/admin', [
+  server.put('/admin', [
     auth.validJWTNeeded,
     controller.addadmin
   ])
@@ -19,5 +21,4 @@ module.exports = server => {
     controller.updatesuperadmin
   ])
 
-  
 }
